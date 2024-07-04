@@ -1,0 +1,43 @@
+name: Collect Static
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'environment to publish: dev or prod'
+        required: true
+        default: 'dev'
+      tag:
+        description: 'the image tag to pull.'
+        required: true
+        default: 'latest' #TODO: switch to master
+jobs:
+  login:
+    runs-on: ubuntu-latest
+    outputs:
+      AWS_PASSWORD: ${{steps.getPassword.outputs.AWS_PASSWORD}}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+          
+      - name: Get AWS password
+        id: getPassword
+        run: |
+          echo "::set-output name=AWS_PASSWORD::$(aws ecr get-login-password --region ap-northeast-2)"
+
+  collectstatic:
+    needs: login
+    runs-on: ubuntu-latest
+    container:
+      image: 590183808431.dkr.ecr.ap-northeast-2.amazonaws.com/api:app
+      credentials:
+        username: AWS
+        password: ${{needs.login.outputs.AWS_PASSWORD}}
+    steps:
+      - name: Collect Static
+        working-directory: /app
+        run: python manage.py collectstatic --verbosity 1 --no-input --settings=config.settings.${{ github.event.inputs.environment }}

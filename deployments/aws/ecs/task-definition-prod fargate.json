@@ -1,0 +1,119 @@
+{
+    "containerDefinitions": [
+        {
+            "name": "api",
+            "image": "590183819768.dkr.ecr.ap-northeast-2.amazonaws.com/api",
+            "command": [
+                "/cmds/start.sh"
+            ],
+            "cpu": 900,
+            "memory": 1000,
+            "portMappings": [
+                {
+                    "name": "app-8000-tcp",
+                    "containerPort": 8000,
+                    "protocol": "tcp",
+                    "appProtocol": "http"
+                }
+            ],
+            "essential": true,
+            "environment": [
+                {
+                  "name": "DEBUG",
+                  "value": "false"
+                },
+                {
+                  "name": "DJANGO_SETTINGS_MODULE",
+                  "value": "config.settings.prod"
+                },
+                {
+                  "name": "REDIS_HOST",
+                  "value": "nallanalla.v91z7n.clustercfg.apn2.cache.amazonaws.com"
+                },
+                {
+                  "name": "CRONTAB_DJANGO_SETTINGS_MODULE",
+                  "value": "config.settings.prod"
+                },
+                {
+                    "name":"ECS_ENABLE_AWS_EXEC",
+                    "value":"true"
+                }
+            ],
+            "environmentFiles": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "ulimits": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-create-group": "true",
+                    "awslogs-group": "/ecs/prod",
+                    "awslogs-region": "ap-northeast-2",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            }
+        },
+        {
+            "name": "celery",
+            "image": "590183819768.dkr.ecr.ap-northeast-2.amazonaws.com/api",
+            "command": [
+                "/cmds/celery_start.sh"
+            ],
+            "cpu": 100,
+            "memory": 1000,
+            "essential": true,
+            "environment": [
+                {
+                  "name": "DEBUG",
+                  "value": "false"
+                },
+                {
+                  "name": "DJANGO_SETTINGS_MODULE",
+                  "value": "config.settings.prod"
+                },
+                {
+                  "name": "REDIS_HOST",
+                  "value": "nallanalla.v91z7n.clustercfg.apn2.cache.amazonaws.com"
+                },
+                {
+                  "name": "CRONTAB_DJANGO_SETTINGS_MODULE",
+                  "value": "config.settings.prod"
+                },
+                {
+                    "name":"ECS_ENABLE_AWS_EXEC",
+                    "value":"true"
+                }
+            ],
+            "environmentFiles": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "ulimits": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-create-group": "true",
+                    "awslogs-group": "/ecs/prod",
+                    "awslogs-region": "ap-northeast-2",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            }
+        }
+    ],
+    "family": "fargatetask",
+    "taskRoleArn": "arn:aws:iam::590183819768:role/ecsTaskExecutionRole",
+    "executionRoleArn": "arn:aws:iam::590183819768:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "volumes": [],
+    "placementConstraints": [],
+    "requiresCompatibilities": [
+        "EC2"
+    ],
+    "cpu": "1024",
+    "memory": "2048",
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "LINUX"
+    }
+  }

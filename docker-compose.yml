@@ -1,0 +1,125 @@
+services:
+  38api:
+    container_name: 38api
+    restart: always
+    image: 38api
+    build:
+      context: .
+      dockerfile: deployments/app/Dockerfile
+    command: 
+      - bash 
+      - -c 
+      - |
+        echo "$$(env ; crontab -l)" | crontab -
+        /etc/init.d/cron start
+        python manage.py crontab add
+        python manage.py migrate
+        python manage.py runserver 0.0.0.0:8000 
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+    ports:
+      - 8000:8000
+
+  # crawler:
+  #   container_name: crawler
+  #   restart: always
+  #   image: crawler
+  #   build:
+  #     context: .
+  #     dockerfile: deployments/crawler/Dockerfile
+  #   command:
+  #     ["/bin/sh", "-c", "/cmds/crawler_start.sh"]
+  #   volumes:
+  #     - ./crawler:/app
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - 9001:9001
+  
+
+  # postgres:
+  #   image: postgis/postgis
+  #   environment:
+  #     POSTGRES_HOST: localhost
+  #     POSTGRES_DB: nallanalla
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_PORT: 5432
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - db_data:/var/lib/postgresql/data
+
+  celery:
+    container_name: celery
+    restart: always
+    image: 38api
+    command: celery -A config.celery worker -l info
+    volumes:
+      - ./backend:/app
+    env_file:
+     - .env
+    depends_on:
+      - 38api
+    
+  # daphne:
+  #   container_name: 
+  #   restart: always
+  #   image: nallanalla
+  #   command: daphne -b 0.0.0.0 -p 9001 config.asgi:application
+  #   expose:
+  #     - "9001"
+  #   volumes:
+  #     - ./nallanalla:/app
+  #   env_file:
+  #    - .env
+  #   depends_on:
+  #     - app
+  
+  redis:
+    container_name: redis
+    restart: always
+    image: redis:latest
+    expose:
+      - "6379"
+    ports:
+      - "6379:6379"
+  
+  # api:
+  #   container_name: api
+  #   restart: always
+  #   image: allthatin/api:latest
+  #   ports:
+  #     - 8000:8000
+  #   environment:
+  #     - DJANGO_SETTINGS_MODULE=config.settings.prod
+  #     - CRONTAB_DJANGO_SETTINGS_MODULE=config.settings.prod
+  #     - ECS_ENABLE_AWS_EXEC=true
+  #   depends_on:
+  #     - redis
+  #   command:
+  #     ["/bin/sh", "-c", "/cmds/start.sh"]
+    
+  # mlapi:
+  #   container_name: mlapi
+  #   restart: always
+  #   image: mlapi
+  #   build:
+  #     context: .
+  #     dockerfile: deployments/mlapi/Dockerfile
+  #   ports:
+  #     - 8002:8002
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - ./mlapi:/app
+  #     - ./deployments:/deployments
+  #   command: ["/bin/sh", "-c", "/cmds/mlapi_start.sh"]
+# volumes:
+#   db_data:
+
+# networks:
+#   bridge:
+#     driver: bridge

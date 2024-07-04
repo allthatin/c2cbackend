@@ -1,0 +1,28 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block after_field_sets %}
+    <style>
+        .image-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .image-container img {
+            width: 300px;
+            height: auto;
+        }
+    </style>
+
+    <fieldset class="module aligned">
+        <h2>결과 이미지 리스트</h2>
+        <div class="image-container">
+            {% for pic in original.results_pics.all %}
+                <div>
+                    <img src="{{ pic.images.url }}">
+                </div>
+            {% endfor %}
+        </div>
+    </fieldset>
+{% endblock %}

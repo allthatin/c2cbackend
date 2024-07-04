@@ -1,0 +1,79 @@
+{
+    "containerDefinitions": [
+        {
+            "name": "dev",
+            "image": "978375825029.dkr.ecr.ap-northeast-2.amazonaws.com/nallanalla:app",
+            "command": [
+                "/cmds/start.sh"
+            ],
+            "cpu": 300,
+            "memory": 500,
+            "portMappings": [
+                {
+                    "name": "app-8000-tcp",
+                    "containerPort": 8000,
+                    "protocol": "tcp",
+                    "appProtocol": "http"
+                }
+            ],
+            "essential": true,
+            "environment": [
+                {
+                  "name": "DEBUG",
+                  "value": "true"
+                },
+                {
+                  "name": "DJANGO_SETTINGS_MODULE",
+                  "value": "config.settings.dev"
+                },
+                {
+                  "name": "REDIS_HOST",
+                  "value": "nallanallaredis.big1oo.ng.0001.apn2.cache.amazonaws.com"
+                },
+                {
+                  "name": "CRONTAB_DJANGO_SETTINGS_MODULE",
+                  "value": "config.settings.dev"
+                },
+                {
+                    "name":"ECS_ENABLE_AWS_EXEC",
+                    "value":"true"
+                }
+            ],
+            "environmentFiles": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "ulimits": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-create-group": "true",
+                    "awslogs-group": "/ecs/fargatedev",
+                    "awslogs-region": "ap-northeast-2",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            }
+        }
+    ],
+    "family": "dev",
+    "taskRoleArn": "arn:aws:iam::978375825029:role/ecsTaskExecutionRole",
+    "executionRoleArn": "arn:aws:iam::978375825029:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "volumes": [],
+    "placementConstraints": [],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "512",
+    "memory": "1024",
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "LINUX"
+    },
+    "tags": [
+        {
+            "key": "lj",
+            "value": "23.12.03"
+        }
+    ]
+  }

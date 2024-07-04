@@ -1,0 +1,17 @@
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: "arn:aws:ecs:ap-northeast-2:978375825029:task-definition/dev:7"
+        LoadBalancerInfo:
+          ContainerName: "dev"
+          ContainerPort: 8000
+        PlatformVersion: "1.4.0"
+        NetworkConfiguration:
+          AwsvpcConfiguration:
+            Subnets:
+              ["subnet-03314e5c58673a703","subnet-06a6bdd8633421cf4", "subnet-0448a79a1438104af","subnet-05ceee84c7d3e6c6c"]
+            SecurityGroups: 
+              - "sg-0ce7dbaf20e40f25e"
+            AssignPublicIp: "ENABLED"

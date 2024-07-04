@@ -1,0 +1,67 @@
+version: '3.4'
+
+services:
+  app:
+    container_name: c2c
+    restart: always
+    image: c2c
+    build:
+      context: .
+      dockerfile: ./deployments/app/Dockerfile
+    command: 
+      - bash 
+      - -c 
+      - |
+        echo "$$(env ; crontab -l)" | crontab -
+        /etc/init.d/cron start
+        python manage.py crontab add
+        pip install debugpy -t /tmp
+        python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 manage.py runserver 0.0.0.0:8000 --nothreading --noreload
+    # entrypoint:
+    #   - bash
+    #   - -c
+    #   - /cmds/start.sh
+    volumes:
+      - ./c2c:/app
+    env_file:
+      - .env
+    ports:
+      - 8000:8000
+      - 5678:5678
+    depends_on:
+      - redis
+    
+  celery:
+    container_name: celery
+    restart: always
+    image: c2c
+    command: celery -A config.celery worker -l debug
+    volumes:
+      - ./c2c:/app
+    env_file:
+     - .env
+    depends_on:
+      - app
+  
+  daphne:
+    container_name: daphne
+    restart: always
+    image: c2c
+    command: daphne -b 0.0.0.0 -p 9001 config.asgi:application
+    expose:
+      - "9001"
+    volumes:
+      - ./c2c:/app
+    env_file:
+     - .env
+    depends_on:
+      - app
+  
+  redis:
+    container_name: redis
+    restart: always
+    image: redis:latest
+    expose:
+      - 6379
+    ports:
+      - 6379:6379
